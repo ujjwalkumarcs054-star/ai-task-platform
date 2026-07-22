@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_ORG/ai-task-platform-infra.git
+    repoURL: https://github.com/ujjwalkumarcs054-star/ai-task-platform-infra.git
     targetRevision: main
     path: k8s
   destination:
