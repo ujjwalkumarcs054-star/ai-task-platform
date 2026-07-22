@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: ai-task-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: worker }
+  template:
+    metadata:
+      labels: { app: worker }
+    spec:
+      containers:
+        - name: worker
+          image: YOUR_REGISTRY/ai-task-worker:latest
+          envFrom:
+            - configMapRef: { name: app-config }
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "300m", memory: "256Mi" }
+          # Worker has no HTTP server; probes check the process is alive
+          # via a lightweight file-based heartbeat pattern is optional.
+          # Here we rely on liveness via process existence (k8s default)
+          # and readiness via a simple exec check that python is running.
+          readinessProbe:
+            exec:
+              command: ["python", "-c", "import socket; socket.create_connection(('redis', 6379), timeout=2)"]
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            exec:
+              command: ["python", "-c", "import socket; socket.create_connection(('redis', 6379), timeout=2)"]
+            initialDelaySeconds: 10
+            periodSeconds: 20
